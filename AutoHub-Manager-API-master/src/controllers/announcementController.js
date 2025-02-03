@@ -1,7 +1,7 @@
-const AnnouncementModel = require("../models/announcement.js");
+import AnnouncementModel from "../models/announcement.js";
 
 
-exports.getAllAnnouncement = async (req, res) => {
+export const getAllAnnouncement = async (req, res) => {
   try {
     const announcementData = await AnnouncementModel.find();
     res.json(announcementData);
@@ -12,7 +12,7 @@ exports.getAllAnnouncement = async (req, res) => {
 };
 
 
-exports.getAnnouncementById = async (req, res) => {
+export const getAnnouncementById = async (req, res) => {
   try {
     const announcement = await AnnouncementModel.findById(req.params.id);
     if (!announcement) {
@@ -26,7 +26,7 @@ exports.getAnnouncementById = async (req, res) => {
 };
 
 
-exports.createAnnouncement = async (req, res) => {
+export const createAnnouncement = async (req, res) => {
   try {
     const { title, summary, details } = req.body;
     const newAnnouncement = new AnnouncementModel({ title, summary, details });
@@ -39,7 +39,7 @@ exports.createAnnouncement = async (req, res) => {
 };
 
 
-exports.updateAnnouncement = async (req, res) => {
+export const updateAnnouncement = async (req, res) => {
   try {
     const { title, summary, details } = req.body;
     const announcement = await AnnouncementModel.findById(req.params.id);
@@ -58,7 +58,7 @@ exports.updateAnnouncement = async (req, res) => {
 };
 
 
-exports.deleteAnnouncement = async (req, res) => {
+export const deleteAnnouncement = async (req, res) => {
   try {
     const announcement = await AnnouncementModel.findByIdAndDelete(req.params.id);
     if (!announcement) {
@@ -71,7 +71,7 @@ exports.deleteAnnouncement = async (req, res) => {
   }
 };
 
-exports.countAnnouncement = async (req, res) => {
+export const countAnnouncement = async (req, res) => {
   try {
     const titleCount = await AnnouncementModel.countDocuments();
     res.status(200).json({ count: titleCount });

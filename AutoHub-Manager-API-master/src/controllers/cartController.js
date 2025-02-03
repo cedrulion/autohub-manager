@@ -1,6 +1,6 @@
-const Cart = require('../models/cart.js');
+import Cart from '../models/cart.js';
 
-exports.addToCart = async (req, res) => {
+export const addToCart = async (req, res) => {
   try {
 
     const { productId, quantity } = req.body;
@@ -20,7 +20,7 @@ exports.addToCart = async (req, res) => {
   }
 };
 
-exports.getCartForUser = async (req, res) => {
+export const getCartForUser = async (req, res) => {
   try {
     const userId = req.user._id;
     const cartItems = await Cart.find({ user: userId, paymentStatus: { $in: ['PENDING', 'PAID'] } }).populate('productId');
@@ -32,7 +32,7 @@ exports.getCartForUser = async (req, res) => {
 };
 
 
-exports.getAllCartItems = async (req, res) => {
+export const getAllCartItems = async (req, res) => {
   try {
     const cartItems = await Cart.find().populate('productId').populate({ path: 'user', select: 'email' });
     res.status(200).json(cartItems);
@@ -43,7 +43,7 @@ exports.getAllCartItems = async (req, res) => {
 };
 
 
-exports.deleteProductItemById = async (req, res) => {
+export const deleteProductItemById = async (req, res) => {
   try {
     const productId = req.params.id;
     const deletedProduct = await Cart.findByIdAndDelete(productId);
@@ -58,7 +58,7 @@ exports.deleteProductItemById = async (req, res) => {
   }
 };
 
-exports.clearCartForUser = async (req, res) => {
+export const clearCartForUser = async (req, res) => {
   try {
     const userId = req.user._id;
     await Cart.updateMany({ user: userId, paymentStatus: 'PENDING' }, { paymentStatus: 'PAID' });
@@ -69,7 +69,7 @@ exports.clearCartForUser = async (req, res) => {
   }
 };
 
-exports.updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   try {
     const { cartItemId, orderStatus } = req.body;
     const updatedCartItem = await Cart.findByIdAndUpdate(
@@ -89,7 +89,7 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-exports.getOrderStatus = async (req, res) => {
+export const getOrderStatus = async (req, res) => {
   try {
     const { cartItemId } = req.params;
     const cartItem = await Cart.findById(cartItemId).populate('productId');
@@ -105,7 +105,7 @@ exports.getOrderStatus = async (req, res) => {
   }
 };
 
-exports.bookAppointment = async (req, res) => {
+export const bookAppointment = async (req, res) => {
   try {
     const { productId, date, location, phoneNumber } = req.body;
     const user = req.user._id;
@@ -126,8 +126,7 @@ exports.bookAppointment = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-exports.getAllAppointmentsForUser = async (req, res) => {
+export const getAllAppointmentsForUser = async (req, res) => {
   try {
     const appointments = await Cart.find()
       .populate('productId')
@@ -139,7 +138,7 @@ exports.getAllAppointmentsForUser = async (req, res) => {
   }
 };
 
-exports.countAllCartProducts = async (req, res) => {
+export const countAllCartProducts = async (req, res) => {
   try {
     const totalQuantity = await Cart.aggregate([
       {
@@ -157,7 +156,7 @@ exports.countAllCartProducts = async (req, res) => {
   }
 };
 
-exports.getTopSellingProduct = async (req, res) => {
+export const getTopSellingProduct = async (req, res) => {
   try {
     const topProduct = await Cart.aggregate([
       {

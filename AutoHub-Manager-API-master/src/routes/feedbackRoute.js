@@ -1,16 +1,16 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const feedbackController = require('../controllers/feedbackController');
+import { createFeedback, getFeedbackList,  getFeedbackCount, markFeedbackAsSeen,  markFeedbackAsUnseen} from '../controllers/feedbackController.js';
 
 
-router.post('/feedback', feedbackController.createFeedback);
-router.get('/feedback', feedbackController.getFeedbackList);
-router.get('/feedback/count', feedbackController.getFeedbackCount);
-router.put('/feedback/:id/mark-seen', feedbackController.markFeedbackAsSeen);
-router.put('/feedback/:id/mark-unseen', feedbackController.markFeedbackAsUnseen);
+router.post('/feedback', createFeedback);
+router.get('/feedback', getFeedbackList);
+router.get('/feedback/count', getFeedbackCount);
+router.put('/feedback/:id/mark-seen', markFeedbackAsSeen);
+router.put('/feedback/:id/mark-unseen', markFeedbackAsUnseen);
 
 
-module.exports = router;
+export default router;
 
 
 

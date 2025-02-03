@@ -1,13 +1,13 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const announcementController = require("../controllers/announcementController");
+import { getAllAnnouncement, getAnnouncementById, createAnnouncement, updateAnnouncement, deleteAnnouncement, countAnnouncement } from "../controllers/announcementController.js";
 
 
-router.get("/announcement", announcementController.getAllAnnouncement);
-router.get("/announcement/:id", announcementController.getAnnouncementById);
-router.post("/announcement/", announcementController.createAnnouncement);
-router.put("/announcement/:id", announcementController.updateAnnouncement);
-router.delete("/announcement/:id",  announcementController.deleteAnnouncement);
-router.get("/countTitles", announcementController.countAnnouncement);
+router.get("/announcement", getAllAnnouncement);
+router.get("/announcement/:id", getAnnouncementById);
+router.post("/announcement/", createAnnouncement);
+router.put("/announcement/:id", updateAnnouncement);
+router.delete("/announcement/:id",  deleteAnnouncement);
+router.get("/countTitles", countAnnouncement);
 
-module.exports = router;
+export default router;

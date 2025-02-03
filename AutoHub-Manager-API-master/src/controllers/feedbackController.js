@@ -1,6 +1,6 @@
-const Feedback = require('../models/feedback.js');
+import Feedback from '../models/feedback.js';
 
-const createFeedback = async (req, res) => {
+export const  createFeedback = async (req, res) => {
   try {
     const feedbackData = req.body;
     const feedback = new Feedback(feedbackData);
@@ -13,7 +13,7 @@ const createFeedback = async (req, res) => {
   }
 };
 
-const getFeedbackCount = async (req, res) => {
+export const  getFeedbackCount = async (req, res) => {
   try {
     const feedbackCount = await Feedback.countDocuments(); // Count the documents in the Feedback collection
     res.status(200).json({ count: feedbackCount });
@@ -23,7 +23,7 @@ const getFeedbackCount = async (req, res) => {
   }
 };
 
-const getFeedbackList = async (req, res) => {
+export const  getFeedbackList = async (req, res) => {
   try {
     const feedbackList = await Feedback.find().sort({ submissionDate: -1 });
     res.status(200).json(feedbackList);
@@ -33,7 +33,7 @@ const getFeedbackList = async (req, res) => {
   }
 };
 
-const markFeedbackAsSeen = async (req, res) => {
+export const  markFeedbackAsSeen = async (req, res) => {
   const feedbackId = req.params.id;
 
   try {
@@ -52,7 +52,7 @@ const markFeedbackAsSeen = async (req, res) => {
   }
 };
 
-const markFeedbackAsUnseen = async (req, res) => {
+export const  markFeedbackAsUnseen = async (req, res) => {
   const feedbackId = req.params.id;
 
   try {
@@ -71,6 +71,6 @@ const markFeedbackAsUnseen = async (req, res) => {
   }
 };
 
-module.exports = { createFeedback, getFeedbackList, markFeedbackAsSeen, markFeedbackAsUnseen, getFeedbackCount };
+
 
 

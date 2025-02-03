@@ -158,3 +158,12 @@ export const UserCount = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+export const getVendors = async (req, res) => {
+  try {
+    const vendors = await Vendor.find(); // Fetch all vendors
+    res.status(200).json({ vendors });
+  } catch (error) {
+    console.error('Error fetching vendors:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

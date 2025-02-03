@@ -1,5 +1,5 @@
-const multer = require('multer');
-const fs = require('fs');
+import multer from 'multer';
+import fs from 'fs';
 
 
 const uploadDir = 'uploads/';
@@ -55,4 +55,4 @@ const upload = multer({
   ,
 });
 
-module.exports = upload;
+export default upload;

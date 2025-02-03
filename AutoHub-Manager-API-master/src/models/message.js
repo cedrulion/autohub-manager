@@ -1,40 +1,38 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import User from './client.js';  // User model
+import Vendor from './vendor.js';  // Vendor model
 
 const messageSchema = new mongoose.Schema({
-  sender: {
+  senderId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'senderModel'
+    refPath: 'senderModel', // Dynamic reference (User or Vendor)
   },
   senderModel: {
     type: String,
-    required: true,
-    enum: ['CLIENT', 'VENDOR']
+    
+    enum: ['User', 'Vendor'], // Specify the models allowed
   },
-  receiver: {
+  receiverId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'receiverModel'
+    refPath: 'receiverModel', // Dynamic reference
   },
   receiverModel: {
     type: String,
-    required: true,
-    enum: ['CLIENT', 'VENDOR']
+    enum: ['User', 'Vendor'], // Specify the models allowed
   },
-  content: {
+  message: {
     type: String,
-    required: true
+    required: true,
   },
-  timestamp: {
-    type: Date,
-    default: Date.now
+  replyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message', // Self-reference for replies
+    default: null,
   },
-  isRead: {
-    type: Boolean,
-    default: false
-  }
-});
+}, { timestamps: true }); // Auto-manage createdAt and updatedAt
 
-const Message = mongoose.model("Message", messageSchema);
+const Message = mongoose.model('Message', messageSchema);
 
 export default Message;

@@ -1,77 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const ClientChat = ({ clientId, vendorId }) => {
-  console.log("Client ID:", clientId);
-  console.log("Vendor ID:", vendorId);
+const parseJwt = (token) => {
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    console.error("Invalid token", e);
+    return null;
+  }
+};
 
+const ClientChat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [receiverId, setReceiverId] = useState(null);
+  const token = localStorage.getItem("token");
+  const decodedToken = parseJwt(token);
+  const senderId = decodedToken?.id;
 
-  useEffect(() => {
-    if (!clientId || !vendorId) {
-      console.error('Client ID or Vendor ID is missing');
-      return;
-    }
-
-    const fetchMessages = async () => {
-      try {
-        const response = await axios.post('http://localhost:4000/api/messages/getmsg', {
-          from: clientId,
-          to: vendorId,
-        });
-        setMessages(response.data);
-      } catch (error) {
-        console.error('Error fetching messages:', error.response ? error.response.data : error.message);
+  // Fetch the vendor (receiverId) from '/api/user/client-list'
+useEffect(() => {
+  axios.get('http://localhost:4000/api/user/vendors', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  .then((response) => {
+    console.log("Vendors response data:", response.data); // Log the response data to inspect its structure
+    const vendors = response.data.vendors; // Access the vendors array
+    if (Array.isArray(vendors)) {
+      const vendor = vendors.find(user => user.role === "VENDOR");
+      if (vendor) {
+        setReceiverId(vendor._id);
+      } else {
+        console.warn("No vendor found.");
       }
-    };
+    } else {
+      console.error("Vendors data is not an array.");
+    }
+  })
+  .catch((error) => console.error("Error fetching vendors:", error));
+}, [token]);
 
-    fetchMessages();
-  }, [clientId, vendorId]);
 
-  const sendMessage = async () => {
-    if (!clientId || !vendorId) {
-      console.error('Client ID or Vendor ID is missing');
+  // Fetch messages when receiverId is available
+  useEffect(() => {
+    if (!senderId || !receiverId) return;
+
+    axios.get(`http://localhost:4000/api/messages/${receiverId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then(res => setMessages(res.data))
+    .catch(err => console.error(err));
+  }, [receiverId, senderId, token]);
+
+  const sendMessage = () => {
+    if (!receiverId) {
+      console.error("Receiver ID is not available.");
       return;
     }
 
-    try {
-      const data = {
-        from: clientId,
-        to: vendorId,
-        message: newMessage,
-        senderModel: 'CLIENT', // Ensure senderModel matches the expected value
-      };
-
-      console.log("Sending message:", data);
-
-      const response = await axios.post('http://localhost:4000/api/messages/addmsg', data);
-      console.log('Message sent successfully:', response.data);
-      setNewMessage('');
-      // Optionally refetch messages here if you want to update the chat after sending a message
-    } catch (error) {
-      console.error('Error sending message:', error.response ? error.response.data : error.message);
-    }
+    axios.post(
+      'http://localhost:4000/api/messages/send',
+      { receiverId, message: newMessage },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+    .then(response => {
+      console.log('Message sent:', response.data);
+      setMessages([...messages, response.data]); // Append the new message
+      setNewMessage(''); // Clear input field
+    })
+    .catch(error => console.error('Error:', error.response?.data || error.message));
   };
 
   return (
     <div>
-      <div className="chat-messages">
-        {messages.map((msg, index) => (
-          <div key={index} className={msg.fromSelf ? 'from-self' : 'from-other'}>
-            {msg.message}
-          </div>
+      <div>
+        {messages.map(msg => (
+          <div key={msg._id}>{msg.message}</div>
         ))}
       </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message..."
-        />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+      <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
+      <button onClick={sendMessage} disabled={!receiverId}>Send</button>
     </div>
   );
 };

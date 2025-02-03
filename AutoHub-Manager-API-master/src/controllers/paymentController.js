@@ -1,6 +1,6 @@
-const stripe = require('stripe')(process.env.STRIPE_KEY);
+import stripe from 'stripe';
 
-exports.acceptPayment = async (req, res) => {
+export const  acceptPayment = async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({
             line_items: [

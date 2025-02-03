@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { ClientSignup, ClientLogin, VendorSignup, VendorLogin, getAllUsers, getClientById, getClientProfile, UserCount } from '../controllers/userController.js';
+import { ClientSignup, ClientLogin, VendorSignup, VendorLogin, getAllUsers, getClientById, getClientProfile, UserCount , getVendors} from '../controllers/userController.js';
 import checkAuth from '../middleware/checkAuthentication.js';
 
 
@@ -13,5 +13,7 @@ router.get('/client-list', getAllUsers) ;
 router.get('/clientId/:id',getClientById)
 router.get('/client/profile', checkAuth,getClientProfile);
 router.get('/count-clients', UserCount);
+router.get('/vendors', getVendors);
+
 
 export default router;
