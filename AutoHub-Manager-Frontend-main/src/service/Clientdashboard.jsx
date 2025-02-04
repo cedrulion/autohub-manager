@@ -53,7 +53,7 @@ function Dashboard() {
               }`}
             onClick={() => handleItemClick('Information')}
           >
-            Oders
+            Orders
           </li>
         </ul>
         <ul className='text-2xl flex lg:flex lg:flex-1 lg:justify-end font-bold mr-20'>

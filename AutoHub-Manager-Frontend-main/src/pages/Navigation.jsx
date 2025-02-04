@@ -10,7 +10,7 @@ export default function Navigation() {
             <nav className="flex items-center mb-6">
             
               <div className="hidden  lg:flex lg:gap-x-12 font-bold">
-                <Link to="/home" className="text-base text-brown font-bold hover:bg-cyan-950 hover:text-white">
+                <Link to="/" className="text-base text-brown font-bold hover:bg-cyan-950 hover:text-white">
                   Home
                 </Link>
                 <Link to="/About" className="text-base text-brown font-bold hover:bg-cyan-950 hover:text-white">
