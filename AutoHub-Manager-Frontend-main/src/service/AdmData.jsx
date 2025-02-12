@@ -9,6 +9,11 @@ const AdmData = () => {
     const [displayQuestionTypePage, setDisplayQuestionTypePage] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(3);
+
     const componentRef = useRef();
     const handlePrint = useReactToPrint({
         content: () => componentRef.current,
@@ -24,6 +29,26 @@ const AdmData = () => {
             });
     }, []);
 
+    // Pagination logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+
+    // Change page
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // Next and Previous page handlers
+    const nextPage = () => {
+        if (currentPage < Math.ceil(products.length / itemsPerPage)) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
     const handleUpdateClick = (product) => {
         setSelectedProduct(product);
@@ -33,20 +58,16 @@ const AdmData = () => {
     const handleUpdateModalClose = () => {
         setIsUpdateModalOpen(false);
     };
+
     const handleDeleteClick = async (productId) => {
         try {
             await axios.delete(`http://localhost:4000/api/prod/product/${productId}`);
             const updatedProducts = products.filter((product) => product._id !== productId);
             setProducts(updatedProducts);
-            // Remove the deleted product from cartItems if it exists
-            const updatedCartItems = cartItems.filter((item) => item.productId._id !== productId);
-            setCartItems(updatedCartItems);
-
         } catch (error) {
             console.error('Error deleting product:', error);
         }
     };
-
 
     const handleQuestionTypeClick = () => {
         setDisplayQuestionTypePage(true);
@@ -67,7 +88,6 @@ const AdmData = () => {
                     </div>
 
                     <div className="font-serif container mx-auto px-4  items-left">
-
                         <h1 className="text-2xl font-semibold text-blue-500 mb-4">Product database</h1>
                         <div className="overflow-x-auto">
                             <table className="w-full bg-white shadow-md rounded-lg  ">
@@ -79,11 +99,11 @@ const AdmData = () => {
                                         <th className="px-4 py-3 border-b border-black text-left text-xm font-medium  font-semibold tracing-wider">Status</th>
                                         <th className="px-4 py-3 border-b border-black text-left text-xm font-medium  font-semibold tracking-wider">Gear box</th>
                                         <th className="px-4 py-3 border-b border-black text-left text-xm font-medium  font-semibold tracking-wider">Tank</th>
-                                        <th className="px-4 py-3 border-b border-black text-left text-xm font-medium  font-semibold tracking-wider">Actions</th> {/* Add this header for actions */}
+                                        <th className="px-4 py-3 border-b border-black text-left text-xm font-medium  font-semibold tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {products.map((product, index) => (
+                                    {currentProducts.map((product, index) => (
                                         <tr key={product._id} className={index % 2 === 0 ? '' : 'bg-white hover:bg-gray-200'}>
                                             <td className="px-4 py-4 whitespace-no-wrap">
                                                 <div className="flex items-center">
@@ -124,8 +144,30 @@ const AdmData = () => {
                                         </tr>
                                     ))}
                                 </tbody>
-
                             </table>
+                            
+                            {/* Pagination Controls */}
+                            <div className="flex justify-center items-center mt-4 space-x-4">
+                                <button 
+                                    onClick={prevPage} 
+                                    disabled={currentPage === 1}
+                                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                                >
+                                    Previous
+                                </button>
+                                
+                                <span className="text-gray-700">
+                                    Page {currentPage} of {Math.ceil(products.length / itemsPerPage)}
+                                </span>
+                                
+                                <button 
+                                    onClick={nextPage} 
+                                    disabled={currentPage === Math.ceil(products.length / itemsPerPage)}
+                                    className={`px-4 py-2 rounded ${currentPage === Math.ceil(products.length / itemsPerPage) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </>
@@ -135,9 +177,6 @@ const AdmData = () => {
                     <Addingproduct selectedProduct={selectedProduct} />
                 </div>
             )}
-            {/* {selectedProduct && (
-    <UpdateModal isOpen={isUpdateModalOpen} onClose={handleUpdateModalClose} onUpdate={handleUpdateProduct} product={selectedProduct} />
-)} */}
         </div>
     );
 }

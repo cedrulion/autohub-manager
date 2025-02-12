@@ -25,13 +25,19 @@ function CompanyLogin() {
         try {
             const response = await axios.post('http://localhost:4000/api/user/vendor/login', formData);
             if (response.data && response.data.token) {
-                console.log('User logged in successfully');
                 const token = response.data.token;
+                const role = response.data.role; // Get the role from the response
                 localStorage.setItem('token', token); // Store the token in localStorage
                 console.log('Token:', token);
-                console.log('User logged in successfully');
-                toast.success('User logged in successfully');
-                navigate('/Vendordashboard');
+                console.log('User  logged in successfully');
+                toast.success('User  logged in successfully');
+
+                // Navigate based on the role
+                if (role === 'ADMIN') {
+                    navigate('/admindashboard'); // Navigate to admin dashboard
+                } else {
+                    navigate('/Vendordashboard'); // Navigate to vendor dashboard
+                }
             } else {
                 console.error('Invalid credentials');
                 setErrorMessage('Invalid credentials');
@@ -44,7 +50,6 @@ function CompanyLogin() {
 
     return (
         <div className="font-serif min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: `url(${luca})` }}>
-
             <div className="flex justify-left ml-24 mt-24 w-full">
                 <div className="bg-white p-8 rounded-lg shadow-md w-96">
                     <h1 className='text-center'> <span className="text-2xl font-bold mb-4">Vendor </span><span className='text-2xl font-bold mb-4 text-blue-700'>Login</span></h1>
@@ -63,14 +68,16 @@ function CompanyLogin() {
                                 placeholder="Email"
                                 value={formData.businessemail}
                                 onChange={handleChange}
+                                autoComplete="new-email"
                                 className="w-80 p-2 mb-4 border-2 border-gray-400 rounded"
                             /><br />
                             <input
                                 type="password"
-                                name="password"
+                                 name="password"
                                 placeholder="Password"
                                 value={formData.password}
                                 onChange={handleChange}
+                                autoComplete="new-password"
                                 className="w-80 p-2 mb-4 border-2 border-gray-400 rounded"
                             /><br />
                             <button
@@ -91,12 +98,12 @@ function CompanyLogin() {
                             </div>
                         </form>
                     </div>
-                    </div>
-                    <span className='text-white ml-32 font-bold text-4xl  justify-center'>Autohub Manager</span>
                 </div>
-                <ToastContainer />
+                <span className='text-white ml-32 font-bold text-4xl justify-center'>Autohub Manager</span>
             </div>
-            );
+            <ToastContainer />
+        </div>
+    );
 }
 
-            export default CompanyLogin;
+export default CompanyLogin;

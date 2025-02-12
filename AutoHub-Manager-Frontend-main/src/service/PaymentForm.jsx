@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PaymentForm = () => {
     const location = useLocation();
@@ -16,6 +18,15 @@ const PaymentForm = () => {
             setProductNames(itemNames.join(', '));
         }
     }, [location.state]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            toast.error('You are out of time');
+            navigate('/clientdashboard');
+        }, 30000); // 30 seconds
+
+        return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    }, [navigate]);
 
     const handleSubmit = async () => {
       try {

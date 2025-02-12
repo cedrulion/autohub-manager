@@ -32,7 +32,7 @@ function CompanySignup() {
                 localStorage.setItem('token', token); // Store the token in localStorage
                 console.log('User signed up successfully');
                 toast.success('Vendor registered successfully');
-                navigate('/Vendordashboard');
+                navigate('/Vendorlogin');
             } else {
                 console.error('Unexpected response status:', response.status);
                 toast.error('An unexpected error occurred. Please try again later.');
@@ -81,6 +81,7 @@ function CompanySignup() {
                             placeholder="Business Email"
                             value={formData.businessemail}
                             onChange={handleChange}
+                             autoComplete="new-email"
                             className="w-full p-2 mb-4 border rounded bg-white border-2 border-gray-400 hover:border-blue-900 hover:shadow-md"
                         />
                         <input
@@ -89,6 +90,7 @@ function CompanySignup() {
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
+                             autoComplete="new-password"
                             className="w-full p-2 mb-4 border rounded bg-white border-2 border-gray-400 hover:border-blue-900 hover:shadow-md"
                         />
                         <button

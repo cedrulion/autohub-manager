@@ -16,12 +16,12 @@ const Overview = () => {
     const [quantity, setQuantity] = useState(1);
     const [showPopup, setShowPopup] = useState(false);
     const [isOpen, setIsOpen] = useState({
-        carCost: false,
-        basicInfo: false,
-        region: false,
-        color: false,
-        moreDetails: false,
-        image: false,
+        carCost: true,
+        basicInfo: true,
+        region: true,
+        color: true,
+        moreDetails: true,
+        image: true,
     });
 
     useEffect(() => {

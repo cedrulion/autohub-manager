@@ -19,6 +19,8 @@ import PaymentForm from "./service/PaymentForm";
 import PaymentSuccess from "./service/PaymentSuccess";
 import PaymentFailure from "./service/PaymentFailure";
 import About from "./pages/About";
+import Admoverview from './service/AdmOverview';
+import AdminPage from './service/AdminPage';
 
 
 function App() {
@@ -32,6 +34,8 @@ function App() {
         <Route path='reportingproblem' element={<Reportingproblem/>}/>
         <Route path='registeredcompany' element={<Registeredcompany/>}/>
         <Route path='registereduser' element={<Registereduser/>}/>
+        <Route path='admindashboard' element={<Admoverview/>}/>
+        <Route path='adminpage' element={<AdminPage/>}/>
         <Route path='reportedproblem' element={<Reportedproblem/>}/>
         <Route path='companyrelatedproblem' element={<Companyrelatedproblem/>}/>
         <Route path='Clientlogin' element={<ClientLogin/>}/>

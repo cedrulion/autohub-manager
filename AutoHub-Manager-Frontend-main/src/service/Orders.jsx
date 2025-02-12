@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './CartItems.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ClientChat from './ClientChart';
 import { parseJwt } from './utils';
 
@@ -11,9 +11,9 @@ const Orders = ({ vendorId }) => {
     const [error, setError] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const navigate = useNavigate();
+    const location = useLocation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
@@ -79,59 +79,104 @@ const Orders = ({ vendorId }) => {
         navigate('/PaymentForm', { state: { totalPrice, productscart } });
     };
 
+    const handleAddToCartClick = () => {
+        // Navigate to the previous route or a default route if no previous route exists
+        const previousPath = location.state?.from || '/Clientdashboard/';
+        navigate(previousPath);
+    };
+
     return (
-        <div className='flex flex-col'>
+        <div className='container mx-auto px-4 py-8'>
             <div className='text-right'>
                 <ToastContainer />
             </div>
-            <div>
-                <h1 className="font-bold text-3xl text-blue-500 mb-8 ml-8">Your pending carts</h1>
-            </div>
+            
+            <h1 className="font-bold text-3xl text-blue-500 mb-8">Your Pending Carts</h1>
 
-            {productscart.map((item) => (
-                <div className='ml-12' key={item._id}>
-                    <div className="border rounded-lg overflow-hidden shadow-lg shadow-gray-800 flex mb-4">
-                        <img src={item.productId.photo && item.productId.photo.length > 0 ? `http://localhost:4000/${item.productId.photo[0].path}` : 'placeholder.jpg'} alt={item.productId.name} className="w-2/4 h-64 object-cover" />
-                        <div className="p-4 w-1/4 grid">
-                            <div className="w-3/4 flex flex-row justify-between">
-                                <h2 className="text-2xl text-black font-semibold">{item.productId.name}</h2>
-                                <button className="btn-buy rounded-full ml-12 text-white text-sm py-1 px-4" style={{ backgroundColor: getButtonColor(item.productId.status) }}>{item.productId.status}</button>
-                                <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-32" onClick={() => removeFromCart(item._id)}>Remove</button>
+            <div className='grid md:grid-cols-1 lg:grid-cols-2 gap-6'>
+                <div className='space-y-6'>
+                    {productscart.map((item) => (
+                        <div key={item._id} className="border rounded-lg overflow-hidden shadow-lg flex">
+                            <img 
+                                src={item.productId.photo && item.productId.photo.length > 0 
+                                    ? `http://localhost:4000/${item.productId.photo[0].path}` 
+                                    : 'placeholder.jpg'} 
+                                alt={item.productId.name} 
+                                className="w-1/3 h-64 object-cover" 
+                            />
+                            <div className="p-6 w-2/3 flex flex-col justify-between">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h2 className="text-2xl text-black font-semibold">{item.productId.name}</h2>
+                                    <div className="flex space-x-2">
+                                        <button 
+                                            className="btn-buy rounded-full text-white text-sm py-1 px-4" 
+                                            style={{ backgroundColor: getButtonColor(item.productId.status) }}
+                                        >
+                                            {item.productId.status}
+                                        </button>
+                                        <button 
+                                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" 
+                                            onClick={() => removeFromCart(item._id)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                    <p className="text-md">Quantity: {item.quantity}</p>
+                                    <p className="text-md">Price (RWF): {item.productId.price}</p>
+                                    <p className="text-md">Gear Box: {item.productId.gearbox}</p>
+                                    <p className="text-md">Tank: {item.productId.tank}</p>
+                                    <p className="text-md">Added on {formatDate(item.date)}</p>
+                                </div>
+                                
+                                <div className="flex items-center mt-4">
+                                    <span className="mr-2">{item.productId.rating.toFixed(1)}</span>
+                                    {[...Array(5)].map((_, index) => (
+                                        <svg
+                                            key={index}
+                                            className={`h-5 w-5 fill-current ${index < item.productId.rating ? "text-yellow-600" : "text-gray-400"}`}
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <polygon points="10,0 13,7 20,7 15,12 17,20 10,16 3,20 5,12 0,7 7,7" />
+                                        </svg>
+                                    ))}
+                                </div>
                             </div>
-                            <p className="text-md mb-2">Quantity: {item.quantity}</p>
-                            <p className="text-md mb-2">Price (RWF): {item.productId.price}</p>
-                            <p className="text-md mb-2">Gear Box: {item.productId.gearbox}</p>
-                            <p className="text-md mb-2">Tank: {item.productId.tank}</p>
-                            <p className="text-md mb-2">Added on {formatDate(item.date)}</p>
                         </div>
-                        <div className="flex items-center">
-                            <span className="mr-2">{item.productId.rating.toFixed(1)}</span>
-                            {[...Array(5)].map((_, index) => (
-                                <svg
-                                    key={index}
-                                    className={`h-5 w-5 fill-current ${index < item.productId.rating ? "text-yellow-600" : "text-gray-400"}`}
-                                    viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <polygon points="10,0 13,7 20,7 15,12 17,20 10,16 3,20 5,12 0,7 7,7" />
-                                </svg>
-                            ))}
-                        </div>
-                    </div>
+                    ))}
                 </div>
-            ))}
 
-            <div className='fixed right-0 gap-8 top-32 bottom-0 w-1/4 bg-white'>
-                <div className="border rounded-lg overflow-hidden shadow-lg shadow-gray-800 flex mb-4 mt-8">
-                    <div className="p-4 w-2/4 grid">
-                        <h2 className="text-2xl text-black font-semibold">Total Price</h2>
-                        <p className='text-lg mb-2'>Product Name: {productscart.map(item => item.productId.name).join(', ')}</p>
-                        <p className="text-lg mb-2">Quantity: {productscart.reduce((acc, item) => acc + item.quantity, 0)}</p>
-                        <p className="text-lg mb-2">Total price (RWF): {totalPrice}</p>
-                        <button onClick={handleButtonClick} className='bg-blue-900 hover:bg-yellow-800 text-white font-bold py-2 px-4 rounded'>Make payment</button>
+                <div className='sticky top-8'>
+                    <div className="border rounded-lg overflow-hidden shadow-lg p-6">
+                        <h2 className="text-2xl text-black font-semibold mb-4">Total Price</h2>
+                        <div className="space-y-3">
+                            <p className='text-lg'>Product Name: {productscart.map(item => item.productId.name).join(', ')}</p>
+                            <p className="text-lg">Quantity: {productscart.reduce((acc, item) => acc + item.quantity, 0)}</p>
+                            <p className="text-lg font-bold">Total price (RWF): {totalPrice}</p>
+                            
+                            <div className="flex space-x-4 mt-4">
+                                <button 
+                                    onClick={handleButtonClick} 
+                                    className='bg-blue-900 hover:bg-yellow-800 text-white font-bold py-2 px-4 rounded flex-1'
+                                >
+                                    Make Payment
+                                </button>
+                                <button 
+                                    onClick={handleAddToCartClick} 
+                                    className='bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded flex-1'
+                                >
+                                    Add Item to Cart
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            {/* Chat button and modal remain the same */}
             <div>
                 <div className="fixed bottom-8 right-8">
                     <button
@@ -149,14 +194,14 @@ const Orders = ({ vendorId }) => {
                         <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-lg">
                             <div className="flex justify-end p-2">
                                 <button
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className="bg-blue-300 text-black hover:text-white hover:bg-red-500 px-2 py-1 rounded mb-4"
                                     onClick={toggleModal}
                                 >
-                                    <button className="bg-blue-300 text-black hover:text-white hover:bg-red-500 px-2 py-1 rounded mb-4" >X</button>
+                                    X
                                 </button>
                             </div>
                             <div className="p-6">
-                            <ClientChat vendorId={vendorId} clientId={clientId} />
+                                <ClientChat vendorId={vendorId} clientId={clientId} />
                             </div>
                         </div>
                     </div>

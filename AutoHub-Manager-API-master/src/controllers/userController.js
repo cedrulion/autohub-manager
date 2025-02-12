@@ -96,6 +96,7 @@ export const VendorLogin = async (req, res) => {
   try {
     const { businessemail, password } = req.body;
     const company = await Vendor.findOne({ businessemail });
+    
     if (!company) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -108,7 +109,11 @@ export const VendorLogin = async (req, res) => {
     }
 
     const token = await generateToken(businessemail);
-    res.status(200).json({ message: 'Vendor logged in successfully', token });
+    res.status(200).json({ 
+      message: 'Vendor logged in successfully', 
+      token,
+      role: company.role // Include the role in the response
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error logging in company' });
   }
@@ -165,5 +170,35 @@ export const getVendors = async (req, res) => {
   } catch (error) {
     console.error('Error fetching vendors:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+export const createAdminUser  = async () => {
+  try {
+    const adminEmail = 'admin@autohub.com'; // Admin email
+    const adminPassword = 'admin123'; // Admin password
+    const existingAdmin = await Vendor.findOne({ businessemail: adminEmail });
+
+    if (!existingAdmin) {
+      // Hash the password before saving
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
+      const admin = new Vendor({
+        businessname: 'AutoHub Admin',
+        address: '123 Admin St',
+        regno: 1, // You can set this to a unique number
+        businessemail: adminEmail,
+        password: hashedPassword,
+        role: 'ADMIN', // Set the role to ADMIN
+        isAdmin: true, // Set isAdmin to true if you have this field
+      });
+
+      await admin.save();
+      console.log('Admin user created successfully');
+    } else {
+      console.log('Admin user already exists');
+    }
+  } catch (error) {
+    console.error('Error creating admin user:', error);
   }
 };

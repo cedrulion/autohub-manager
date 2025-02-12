@@ -1,6 +1,6 @@
 import multer from 'multer';
 import fs from 'fs';
-
+import path from 'path';
 
 const uploadDir = 'uploads/';
 if (!fs.existsSync(uploadDir)) {
@@ -9,50 +9,40 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    
     console.log('Destination:', uploadDir); 
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    
-    console.log('Original Filename:', file.originalname); 
-    cb(null, file.originalname); 
+    // Generate a unique filename to prevent overwriting
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   },
 });
-
-
-
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 50000000, // 10MB
-    files: 10, // 10 files
-    totalSize: 500000000, // 100MB
+    fileSize: 5 * 1024 * 1024, // 5MB per file
+    files: 5, // Maximum 5 files
   },
   fileFilter: function (req, file, cb) {
-    
-    const acceptedMimeTypes = [
-      'application/pdf',         
-      'application/msword',      
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-      'image/jpeg',              
-      'image/jpg',               
-      'image/png',               
-      'application/vnd.oasis.opendocument.text', 
-      'application/vnd.ms-powerpoint',          
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation', 
-      
+    // Accepted image MIME types
+    const imageMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp'
     ];
   
-    
-    if (acceptedMimeTypes.includes(file.mimetype)) {
+    // Check file type
+    if (imageMimeTypes.includes(file.mimetype)) {
       cb(null, true); 
     } else {
-      cb(null, false); 
+      // Reject file with an error
+      cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'), false); 
     }
-  }
-  ,
+  },
 });
 
 export default upload;

@@ -54,8 +54,7 @@ export function Home() {
         </div>
         
       </div>
-      <h1 className="font-bold text-3xl text-blue-500  mt-4 ml-8">New Arrivals...</h1>
-      <div className=""> <Conpanyrelatedinfo/></div>
+
       <div className=""><Sections/></div>
       <div className=""><Footers/></div>
       

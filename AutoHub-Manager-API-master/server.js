@@ -9,6 +9,7 @@ import messageRouter from './src/routes/messageRouter.js';
 import productRouter from './src/routes/productRouter.js';
 import cartRoutes from './src/routes/cartRoute.js';
 import paymentRouter from './src/routes/paymentRouter.js';
+import {createAdminUser}from './src/controllers/userController.js';
 
 // Initialize dotenv configuration
 dotenv.config();
@@ -17,6 +18,7 @@ const app = express();
 
 // Connect to database
 dbConnect();
+createAdminUser ();
 
 // Middleware setup
 app.use(express.json());

@@ -63,6 +63,7 @@ function LoginForm() {
                                     placeholder="Email"
                                     value={formData.email}
                                     onChange={handleChange}
+                                    autoComplete="new-email"
                                     className="w-full px-3 py-2 border  rounded border-gray-400 focus:outline-none focus:border-blue-900 bg-white border-2 border-gray-300 hover:border-blue-900 hover:shadow-md"
                                 />
                             </div>
@@ -73,6 +74,7 @@ function LoginForm() {
                                     placeholder="Password"
                                     value={formData.password}
                                     onChange={handleChange}
+                                    autoComplete="new-password"
                                     className="w-full px-3 py-2 border rounded border-gray-400 focus:outline-none focus:border-blue-900 bg-white border-2 border-gray-300 hover:border-blue-900 hover:shadow-md"
                                 />
                             </div>

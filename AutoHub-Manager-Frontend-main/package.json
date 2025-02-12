@@ -18,9 +18,11 @@
     "axios": "^1.5.0",
     "chart.js": "^4.4.3",
     "font-awesome": "^4.7.0",
+    "formik": "^2.4.6",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.475.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
@@ -29,7 +31,8 @@
     "react-router-dom": "^6.4.2",
     "react-to-print": "^2.14.15",
     "react-toastify": "^10.0.4",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.22",

@@ -6,9 +6,13 @@ const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
   const [displayQuestionTypePage, setDisplayQuestionTypePage] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [appointmentsPerPage, setAppointmentsPerPage] = useState(3);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/api/cart/all-appointments') // Ensure this endpoint is correct
+    axios.get('http://localhost:4000/api/cart/all-appointments')
       .then((response) => {
         setAppointments(response.data);
       })
@@ -16,6 +20,30 @@ const AppointmentList = () => {
         console.error('Error fetching appointments:', error);
       });
   }, []);
+
+  // Calculate current appointments
+  const indexOfLastAppointment = currentPage * appointmentsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+  const currentAppointments = appointments.slice(
+    indexOfFirstAppointment, 
+    indexOfLastAppointment
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Next and Previous page handlers
+  const nextPage = () => {
+    if (currentPage < Math.ceil(appointments.length / appointmentsPerPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   const handleQuestionTypeClick = () => {
     setDisplayQuestionTypePage(true);
@@ -30,7 +58,10 @@ const AppointmentList = () => {
       {!displayQuestionTypePage ? (
         <>
           <div className='mt-8 pdf-button-container flex justify-end'>
-            <button className="pdf-button -right bg-blue-500 text-xm" onClick={handleQuestionTypeClick}>
+            <button 
+              className="pdf-button -right bg-blue-500 text-xm" 
+              onClick={handleQuestionTypeClick}
+            >
               Feedback List 
             </button>
           </div>
@@ -56,21 +87,62 @@ const AppointmentList = () => {
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appointment, index) => (
-                <tr key={appointment._id} className={index % 2 === 0 ? 'bg-gray-100' : 'bg-white hover:bg-gray-200'}>
-                  <td className="px-6 py-4 text-black whitespace-no-wrap">{appointment.user && appointment.user.names}</td>
-                  <td className="px-6 py-4 text-black whitespace-no-wrap">{appointment.user && appointment.user.email}</td>
-                  <td className="px-6 py-4 text-black whitespace-no-wrap">{new Date(appointment.date).toLocaleString()}</td>
-                  <td className="px-6 py-4 text-black whitespace-no-wrap">{appointment.location}</td>
-                  <td className="px-6 py-4 text-black whitespace-no-wrap">{appointment.phoneNumber}</td>
+              {currentAppointments.map((appointment, index) => (
+                <tr 
+                  key={appointment._id} 
+                  className={index % 2 === 0 ? 'bg-gray-100' : 'bg-white hover:bg-gray-200'}
+                >
+                  <td className="px-6 py-4 text-black whitespace-no-wrap">
+                    {appointment.user && appointment.user.names}
+                  </td>
+                  <td className="px-6 py-4 text-black whitespace-no-wrap">
+                    {appointment.user && appointment.user.email}
+                  </td>
+                  <td className="px-6 py-4 text-black whitespace-no-wrap">
+                    {new Date(appointment.date).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-black whitespace-no-wrap">
+                    {appointment.location}
+                  </td>
+                  <td className="px-6 py-4 text-black whitespace-no-wrap">
+                    {appointment.phoneNumber}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center mt-4 space-x-4">
+            <button 
+              onClick={prevPage} 
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-500 text-white rounded 
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-gray-700">
+              Page {currentPage} of {Math.ceil(appointments.length / appointmentsPerPage)}
+            </span>
+            <button 
+              onClick={nextPage} 
+              disabled={currentPage >= Math.ceil(appointments.length / appointmentsPerPage)}
+              className="px-4 py-2 bg-blue-500 text-white rounded 
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
         </>
       ) : (
         <div>
-          <button className="pdf-button -right bg-blue-500 text-xm" onClick={handleBackToListClick}>Appointment List</button>
+          <button 
+            className="pdf-button -right bg-blue-500 text-xm" 
+            onClick={handleBackToListClick}
+          >
+            Appointment List
+          </button>
           <Feedback selectedProduct={selectedProduct} />
         </div>
       )}
