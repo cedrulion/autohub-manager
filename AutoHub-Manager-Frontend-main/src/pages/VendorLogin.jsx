@@ -34,7 +34,7 @@ function CompanyLogin() {
 
                 // Navigate based on the role
                 if (role === 'ADMIN') {
-                    navigate('/admindashboard'); // Navigate to admin dashboard
+                    navigate('/adminpage'); // Navigate to admin dashboard
                 } else {
                     navigate('/Vendordashboard'); // Navigate to vendor dashboard
                 }

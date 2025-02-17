@@ -103,7 +103,8 @@ const Information = () => {
                             <p className="text-md mb-2">Price (RWF): {item.productId.price}</p>
                             <p className="text-md mb-2">Gear Box: {item.productId.gearbox}</p>
                             <p className="text-md mb-2">Tank: {item.productId.tank}</p>
-                            <p className="text-md mb-2">Odered on {formatDate(item.date)}</p>
+                            <p className="text-md mb-2">Ordered on {formatDate(item.
+createdAt)}</p>
                             <OrderStatus status={item.orderStatus} />
                         </div>
                         <div className="flex items-center">

@@ -58,9 +58,10 @@ const PaymentForm = () => {
           },
         });
     
-        navigate('/orders');
+        navigate('/paymentSuccess');
       } catch (error) {
         console.error('Error submitting payment:', error);
+        navigate('/paymentFailure');
       }
     };
     

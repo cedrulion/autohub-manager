@@ -72,12 +72,7 @@ function AdminPage() {
                     >
                         <Download className="mr-2" /> Download as PDF
                     </button>
-                    <button 
-                        onClick={() => navigate('/admindashboard')} 
-                        className="flex items-center bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300"
-                    >
-                        <ArrowLeft className="mr-2" /> Back
-                    </button>
+
                 </div>
             </div>
             <p className="text-gray-600 mb-4">Manage clients and vendors efficiently</p>
