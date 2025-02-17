@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ArrowLeft, Users, Briefcase, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import html2canvas from 'html2canvas';
 
 function AdminPage() {
@@ -59,6 +61,10 @@ function AdminPage() {
             pdf.save(`Admin_Dashboard_${currentDate}.pdf`);
         });
     };
+    const handleLogout = () => {
+        localStorage.removeItem('token'); // Clear the token saved in localStorage
+        navigate('/'); // Redirect to the homepage or any other page
+    };
 
     return (
         <div className="max-w-5xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
@@ -72,7 +78,10 @@ function AdminPage() {
                     >
                         <Download className="mr-2" /> Download as PDF
                     </button>
-
+                          <button onClick={handleLogout} className="flex items-center cursor-pointer text-gray-500">
+                            <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
+                            Logout
+                          </button>
                 </div>
             </div>
             <p className="text-gray-600 mb-4">Manage clients and vendors efficiently</p>
