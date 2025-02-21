@@ -135,7 +135,7 @@ function Dashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <p className="mt-1 text-lg">{clientProfile.name}</p>
+                  <p className="mt-1 text-lg">{clientProfile.names}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Address</label>
