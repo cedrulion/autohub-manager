@@ -142,7 +142,7 @@ function AdminPage() {
 
                 {/* Vendors Table */}
                 <div>
-                    <h2 className="text-2xl font-semibold mb-4 text-green-600">Vendors</h2>
+                    <h2 className="text-2xl font-semibold mb-4 text-green-600">AKAGERA Internal Staff</h2>
                     <table className="min-w-full bg-white border rounded-lg">
                         <thead>
                             <tr className="bg-green-100">
