@@ -49,16 +49,17 @@ export const ClientLogin = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
-    const token = await generateToken(email);
+    // Generate token using correct userId
+    const token = generateToken(user);  
     console.log('Generated token:', token); // Debugging statement
 
-    res.status(200).json({ message: 'User logged in successfully', token });
+    res.status(200).json({ message: 'User logged in successfully', token, userId: user._id });
   } catch (error) {
     console.error('Error during login process:', error);  // Detailed error logging
     res.status(500).json({ error: 'Error logging in user' });
   }
 };
+
 
 export const VendorSignup = async (req, res) => {
   try {

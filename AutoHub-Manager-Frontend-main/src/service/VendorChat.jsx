@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const VendorChat = () => {
   const [messages, setMessages] = useState([]);
+  const [groupedMessages, setGroupedMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -14,6 +15,53 @@ const VendorChat = () => {
   useEffect(() => {
     fetchMessages();
   }, []);
+
+  // Group messages with their replies
+  useEffect(() => {
+    const groupMessages = () => {
+      // Create a map of message IDs to their indices in the result array
+      const messageMap = new Map();
+      const result = [];
+
+      // First pass: add all messages without replies to the result array
+      messages.forEach(message => {
+        if (!message.replyTo) {
+          messageMap.set(message._id, result.length);
+          result.push({
+            original: message,
+            replies: []
+          });
+        }
+      });
+
+      // Second pass: add replies to their parent messages
+      messages.forEach(message => {
+        if (message.replyTo) {
+          const replyToId = typeof message.replyTo === 'object' ? message.replyTo._id : message.replyTo;
+          const parentIndex = messageMap.get(replyToId);
+          
+          if (parentIndex !== undefined) {
+            result[parentIndex].replies.push(message);
+          } else {
+            // If parent message not found, treat as a standalone message
+            messageMap.set(message._id, result.length);
+            result.push({
+              original: message,
+              replies: []
+            });
+          }
+        }
+      });
+
+      setGroupedMessages(result);
+    };
+
+    if (messages.length > 0) {
+      groupMessages();
+    } else {
+      setGroupedMessages([]);
+    }
+  }, [messages]);
 
   const fetchMessages = async () => {
     try {
@@ -51,7 +99,20 @@ const VendorChat = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
+      if (!token) {
+        toast.error("Authentication token not found");
+        return;
+      }
+
+      // Show pending toast
+      toast.info("Sending reply...");
+      
+      console.log("Sending reply:", {
+        message: messageText,
+        replyTo: replyToMessageId
+      });
+      
+      const response = await axios.post(
         "http://localhost:4000/api/messages/reply",
         { 
           message: messageText, 
@@ -60,20 +121,34 @@ const VendorChat = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         }
       );
 
-      // Optimistically update UI
+      console.log("Reply response:", response.data);
+      
+      // Success handling
       toast.success("Reply sent successfully");
       setReplyingTo(null);
       setReplyText("");
       
-      // Refetch messages to ensure consistency
-      fetchMessages();
+      // Refetch messages
+      setTimeout(fetchMessages, 500);
+      
     } catch (error) {
-      console.error("Error sending reply:", error.response?.data || error.message);
-      toast.error("Failed to send reply. Please try again.");
+      console.error("Error sending reply:", error);
+      
+      // Detailed error information
+      const statusCode = error.response?.status;
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message;
+      
+      toast.error(`Reply failed (${statusCode}): ${errorMessage}`);
+      
+      // Token issue detection
+      if (statusCode === 401) {
+        toast.error("Your session may have expired. Please log out and log in again.");
+      }
     }
   };
 
@@ -100,60 +175,78 @@ const VendorChat = () => {
     </div>
   );
 
-  const MessageCard = ({ message }) => (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4 transition-all hover:shadow-lg">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center space-x-3">
-          <FaUser className="text-blue-500 text-2xl" />
-          <div>
-            <h3 className="font-semibold text-gray-800">{message.senderName}</h3>
-            <span className="text-xs text-gray-500">
-              {renderMessageTime(message.createdAt)}
-            </span>
+  const MessageThread = ({ thread }) => {
+    const { original, replies } = thread;
+    const senderName = original.senderName || "Client";
+    
+    return (
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4 transition-all hover:shadow-lg">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center space-x-3">
+            <FaUser className="text-blue-500 text-2xl" />
+            <div>
+              <h3 className="font-semibold text-gray-800">{senderName}</h3>
+              <span className="text-xs text-gray-500">
+                {renderMessageTime(original.createdAt)}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <p className="text-gray-700 mb-3">{message.message}</p>
+        <p className="text-gray-700 mb-3">{original.message}</p>
 
-      {message.replyTo && (
-        <div className="bg-gray-100 rounded-md p-3 mb-3">
-          <p className="text-sm text-gray-600 italic">
-            <strong>In reply to:</strong> {message.replyTo.message}
-          </p>
-        </div>
-      )}
-
-      <div className="flex justify-between items-center">
-        <button
-          onClick={() => setReplyingTo(message._id)}
-          className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 text-sm"
-        >
-          <FaReply /> <span>Reply</span>
-        </button>
-      </div>
-
-      {replyingTo === message._id && (
-        <div className="mt-4">
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Type your reply..."
-              className="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={() => handleReply(replyText, message._id)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition flex items-center space-x-2"
-            >
-              <FaPaperPlane /> <span>Send</span>
-            </button>
+        {/* Replies section */}
+        {replies.length > 0 && (
+          <div className="mt-4 border-t pt-3">
+            <h4 className="font-medium text-gray-700 mb-2">Replies</h4>
+            {replies.map(reply => (
+              <div key={reply._id} className="bg-gray-50 rounded-md p-3 mb-2">
+                <div className="flex items-center mb-2">
+                  <FaUser className="text-green-500 text-lg mr-2" />
+                  <div>
+                    <span className="font-medium text-gray-800">{reply.senderName || "You"}</span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      {renderMessageTime(reply.createdAt)}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-gray-700">{reply.message}</p>
+              </div>
+            ))}
           </div>
+        )}
+
+        <div className="flex justify-between items-center mt-3">
+          <button
+            onClick={() => setReplyingTo(original._id)}
+            className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 text-sm"
+          >
+            <FaReply /> <span>Reply</span>
+          </button>
         </div>
-      )}
-    </div>
-  );
+
+        {replyingTo === original._id && (
+          <div className="mt-4">
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Type your reply..."
+                className="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => handleReply(replyText, original._id)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition flex items-center space-x-2"
+              >
+                <FaPaperPlane /> <span>Send</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -166,7 +259,14 @@ const VendorChat = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-        {error}
+        <p className="font-bold">Error loading messages:</p>
+        <p>{error}</p>
+        <button 
+          onClick={fetchMessages}
+          className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 font-bold py-2 px-4 rounded"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -176,12 +276,12 @@ const VendorChat = () => {
       <ToastContainer position="top-right" />
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Vendor Messages</h1>
       
-      {messages.length === 0 ? (
+      {groupedMessages.length === 0 ? (
         <EmptyState />
       ) : (
         <div>
-          {messages.map((message) => (
-            <MessageCard key={message._id} message={message} />
+          {groupedMessages.map((thread) => (
+            <MessageThread key={thread.original._id} thread={thread} />
           ))}
         </div>
       )}

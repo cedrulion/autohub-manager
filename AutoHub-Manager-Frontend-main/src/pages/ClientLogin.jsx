@@ -28,8 +28,9 @@ function LoginForm() {
     
             if (response.data && response.data.token) {
                 console.log('User logged in successfully');
-                const token = response.data.token;
-                localStorage.setItem('token', token); // Store the token in localStorage
+                const { token, userId } = response.data;
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId); // Store the userId in localStorage
                 console.log('User logged in successfully');
                 toast.success('User logged in successfully');
                 navigate('/Clientdashboard');

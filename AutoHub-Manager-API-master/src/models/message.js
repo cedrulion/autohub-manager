@@ -5,7 +5,6 @@ import Vendor from './vendor.js';  // Vendor model
 const messageSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
     refPath: 'senderModel', // Dynamic reference (User or Vendor)
   },
   senderModel: {

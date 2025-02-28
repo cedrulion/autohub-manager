@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Message from '../models/Message.js';
 import { parseJwt } from '../utils/jwtHelper.js';  // Assuming you have a JWT utility to decode token
 import User from '../models/client.js';  // Assuming 'client.js' is for User model (Client)
@@ -42,25 +43,38 @@ export const sendMessage = async (req, res) => {
 // Get chat history (either client -> vendor or vendor -> client)
 export const getChatHistory = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];  // Token from the Authorization header
-    const decodedToken = parseJwt(token);  // Decode the JWT token
-    const senderId = decodedToken.id;  // Get senderId from token
-    const receiverId = req.params.receiverId;  // Get receiverId from the route parameter
+    // Extract token from the authorization header
+    if (!req.headers.authorization) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+    
+    const token = req.headers.authorization.split(" ")[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Invalid authorization format' });
+    }
+    
+    // Decode the JWT token to get the authenticated user ID
+    const decodedToken = parseJwt(token);  
+    const senderId = decodedToken.userId; // Use userId instead of id
 
-    // Fetch all messages between the sender and receiver (both directions)
-    const messages = await Message.find({
-      $or: [
-        { senderId, receiverId },
-        { senderId: receiverId, receiverId: senderId },
-      ],
-    }).sort({ timestamp: 1 });  // Sort messages by timestamp in ascending order (oldest first)
+    console.log(`Authenticated senderId: ${senderId}`);
 
+    // Fetch only messages where the senderId matches the authenticated user
+    const messages = await Message.find({ senderId })
+      .sort({ createdAt: 1 })
+      .populate('replyTo');
+
+    console.log(`Found ${messages.length} messages sent by ${senderId}`);
+    
     res.status(200).json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
-    res.status(500).json({ error: 'Error fetching messages' });
+    res.status(500).json({ error: 'Error fetching messages: ' + error.message });
   }
 };
+
+
 
 
 // Get all messages for a specific vendor (including replies)
@@ -101,37 +115,33 @@ export const getMessagesForClient = async (req, res) => {
   }
 };
 
+
 export const replyToMessage = async (req, res) => {
   try {
-    console.log("Incoming Reply Request:", req.body);
     const { message, replyTo } = req.body;
 
     if (!message || !replyTo) {
       return res.status(400).json({ error: "Message and replyTo are required" });
     }
 
-    // Fetch the original message to get sender and receiver info
+    // Fetch the original message
     const originalMessage = await Message.findById(replyTo);
     if (!originalMessage) {
       return res.status(404).json({ error: "Original message not found" });
     }
 
-    // Create the reply message
+    // Create the reply
     const reply = new Message({
       message,
       replyTo,
-      senderId: req.user.id,  // Ensure authentication middleware is working
-      receiverId: originalMessage.senderId,  // The receiver is the original message sender
-      senderModel: 'User',  // Assuming the sender is always a User (Client)
-      receiverModel: 'Vendor',  // Assuming the receiver is always a Vendor
-      timestamp: Date.now(),
+      receiverId: originalMessage.senderId, // Keep receiver ID logic
     });
 
-    // Save the reply message
-    await reply.save();
-    res.json(reply);
+    const savedReply = await reply.save();
+    res.status(200).json({ message: "Reply sent successfully", reply: savedReply });
+
   } catch (error) {
-    console.error("Error in reply API:", error);
-    res.status(500).json({ error: "Error replying to message" });
+    console.error("Error replying to message:", error);
+    res.status(500).json({ error: "Error replying to message: " + error.message });
   }
 };

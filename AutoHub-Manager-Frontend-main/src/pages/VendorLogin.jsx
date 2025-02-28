@@ -25,18 +25,18 @@ function CompanyLogin() {
         try {
             const response = await axios.post('http://localhost:4000/api/user/vendor/login', formData);
             if (response.data && response.data.token) {
-                const token = response.data.token;
-                const role = response.data.role; // Get the role from the response
-                localStorage.setItem('token', token); // Store the token in localStorage
+                const { token, role, userId } = response.data; // Extract userId from response
+                localStorage.setItem('token', token); // Store token
+                localStorage.setItem('userId', userId); // Store userId
                 console.log('Token:', token);
-                console.log('User  logged in successfully');
-                toast.success('User  logged in successfully');
-
+                console.log('User logged in successfully');
+                toast.success('User logged in successfully');
+    
                 // Navigate based on the role
                 if (role === 'ADMIN') {
-                    navigate('/adminpage'); // Navigate to admin dashboard
+                    navigate('/adminpage');
                 } else {
-                    navigate('/Vendordashboard'); // Navigate to vendor dashboard
+                    navigate('/Vendordashboard');
                 }
             } else {
                 console.error('Invalid credentials');
@@ -47,6 +47,7 @@ function CompanyLogin() {
             setErrorMessage('Email or password is not correct. Please try again later.');
         }
     };
+    
 
     return (
         <div className="font-serif min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: `url(${luca})` }}>

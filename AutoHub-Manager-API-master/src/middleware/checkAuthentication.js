@@ -18,25 +18,55 @@ export default async function checkAuth(req, res, next) {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    
+    console.log('Decoded token:', decoded); // Debug log
 
-    // Check if the user exists in either Client or Vendor model
-    let user = await User.findOne({ email: decoded.email });
-    if (!user) {
+    // First try to find a vendor (since we're fixing vendor reply functionality)
+    let user = null;
+    
+    // Try to find vendor by ID first
+    if (decoded.userId) {
+      user = await Vendor.findById(decoded.userId);
+    }
+    
+    // If not found, try by business email
+    if (!user && decoded.email) {
       user = await Vendor.findOne({ businessemail: decoded.email });
+    }
+    
+    // If still not found, check client models
+    if (!user && decoded.userId) {
+      user = await User.findById(decoded.userId);
+    }
+    
+    if (!user && decoded.email) {
+      user = await User.findOne({ email: decoded.email });
     }
 
     if (!user) {
+      console.log('User not found with token data:', decoded); // Debug log
       return res.status(401).json({ message: 'User not found' });
     }
 
-    // Attach user to request
-    req.user = user;
+    // Attach user to request object with required properties
+    req.user = {
+      _id: user._id,
+      role: user.role || (user.adminPrivileges ? 'ADMIN' : 'VENDOR'),
+      email: user.email || user.businessemail
+    };
+
+    console.log('Authenticated user:', req.user); // Debug log
     next();
+    
   } catch (error) {
+    console.error('Authentication error:', error);
+    
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Authentication token expired' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token format' });
     }
 
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json({ message: 'Authentication failed: ' + error.message });
   }
 }
