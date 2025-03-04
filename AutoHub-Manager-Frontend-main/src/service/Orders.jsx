@@ -75,9 +75,29 @@ const Orders = ({ vendorId }) => {
         return status === 'NEW' ? '#3182ce' : '#e53e3e';
     };
 
-    const handleButtonClick = () => {
-        navigate('/PaymentForm', { state: { totalPrice, productscart } });
+    const handleButtonClick = async () => {
+        try {
+            const cartId = productscart[0]?._id;  // Get the cartId from the first item or any other method
+    
+            const requestData = {
+                names: 'Customer Name',
+                cartId: cartId,  // Pass cartId for unauthenticated users
+            };
+    
+            const response = await axios.post('http://localhost:4000/api/payment/accept-payment', requestData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem("token")  // Keep token if authenticated
+                },
+            });
+            
+            window.location.href = response.data.url;
+        } catch (error) {
+            console.error('Error initiating payment:', error);
+            toast.error('Failed to initiate payment');
+        }
     };
+    
 
     const handleAddToCartClick = () => {
         // Navigate to the previous route or a default route if no previous route exists

@@ -44,7 +44,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Clear the token saved in localStorage
-    navigate('/'); // Redirect to the homepage or any other page
+    navigate('/ClientLogin'); // Redirect to the homepage or any other page
   };
 
   const handleItemClick = (item) => {

@@ -16,7 +16,7 @@ export const ClientSignup = async (req, res) => {
       address,
       phone,
       email,
-      password: hashedPassword, // Store the hashed password
+      password: hashedPassword, 
       role,
     });
 
@@ -175,7 +175,7 @@ export const getVendors = async (req, res) => {
 };
 export const createAdminUser  = async () => {
   try {
-    const adminEmail = 'admin@autohub.com'; // Admin email
+    const adminEmail = 'admin@akagera.com'; // Admin email
     const adminPassword = 'admin123'; // Admin password
     const existingAdmin = await Vendor.findOne({ businessemail: adminEmail });
 

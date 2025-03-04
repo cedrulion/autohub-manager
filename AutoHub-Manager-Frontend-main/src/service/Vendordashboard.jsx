@@ -22,7 +22,7 @@ function Dashboard() {
   const mainContentRef = useRef(null);
 
   const handleLogout = () => {
-    navigate('/');
+    navigate('/VendorLogin');
     // Handle logout logic here
   };
 
